@@ -12,17 +12,30 @@ class Spectrum_from_MALDI(tk.Frame):
         super().__init__(master)
         self.master = master
         self.master.title("MALDI用スペクトル表示ツール")
+
+        # pyplotの初期設定
+        plt.rcParams['font.family'] = 'Arial'
+        plt.rcParams['font.size'] = '20'
+        plt.subplots_adjust(
+            top=0.92,
+            bottom=0.22,
+            left=0.125,
+            right=0.9,
+            hspace=0.2,
+            wspace=0.2
+        )
        
         # フレームとボタンの作成
         self.graph_frame = self.create_graph_frame()
         self.file_frame = self.create_file_frame()
-        self.option_button = tk.Button(self.master, 
-                                  text = "オプション", 
+        self.option_button = tk.Button(
+                                self.master, 
+                                text = "オプション", 
                                 #   command = self.get_params
-                                  )
+                                )
 
         # 配置
-        self.graph_frame.pack(expand=True)
+        self.graph_frame.pack(fill=tk.BOTH, expand=True)
         self.file_frame.pack()
         self.option_button.pack()
 
@@ -71,46 +84,41 @@ class Spectrum_from_MALDI(tk.Frame):
             filetypes = typ, 
             initialdir = dir
         ) 
-        return raw_data_path[0]
+        return raw_data_path
     
 
     # スペクトルの作成
-    def create_spectrum(self, raw_data_path):
-        f = open(raw_data_path, "r")
-        raw_data = list(map(lambda x: list(map(float, x.split())),f.readlines()))
+    def create_spectrum(self, raw_data_path):        
+        # 複数のグラフを縦に並べる
+        n_data = len(raw_data_path)
+        for i,path in enumerate(raw_data_path):
+            f = open(path, "r")
+            raw_data = list(map(lambda x: list(map(float, x.split())),f.readlines()))
 
-        # pd.DataFrameにしてm/zでグループ化
-        df = pd.DataFrame(raw_data, columns=["m/z", "intensity"])
-        # print(df.head())
-        # print(df.groupby("m/z", as_index=False).sum())
-        data = df.groupby("m/z", as_index=False).sum()
+            # pd.DataFrameにしてm/zでグループ化
+            df = pd.DataFrame(raw_data, columns=["m/z", "intensity"])
+            # print(df.head())
+            # print(df.groupby("m/z", as_index=False).sum())
+            data = df.groupby("m/z", as_index=False).sum()
 
-        # スペクトル出力
-        plt.rcParams['font.family'] = 'Arial'
-        plt.rcParams['font.size'] = '20'
-        ax = self.fig.add_subplot(1, 1, 1)
-        plt.subplots_adjust(top=0.92,
-        bottom=0.22,
-        left=0.125,
-        right=0.9,
-        hspace=0.2,
-        wspace=0.2)
-        X = data[(self.params.lower_limit<=data["m/z"]) & (data["m/z"]<=self.params.upper_limit)]["m/z"]
-        y = data[(self.params.lower_limit<=data["m/z"]) & (data["m/z"]<=self.params.upper_limit)]["intensity"]
+            # スペクトル追加
+            ax = self.fig.add_subplot(n_data, 1, i+1)
+            X = data[(self.params.lower_limit<=data["m/z"]) & (data["m/z"]<=self.params.upper_limit)]["m/z"]
+            y = data[(self.params.lower_limit<=data["m/z"]) & (data["m/z"]<=self.params.upper_limit)]["intensity"]
 
-        # スムージング
-        y_smoothed = gaussian_filter1d(y, sigma=7)
+            # スムージング
+            y_smoothed = gaussian_filter1d(y, sigma=7)
 
-        ax.set_xlim(self.params.lower_limit,self.params.upper_limit)
-        ax.set_ylim(0,max(y_smoothed))
-        ax.set_xlabel("m/z")
-        ax.set_ylabel("Intensity")
+            ax.set_xlim(self.params.lower_limit,self.params.upper_limit)
+            ax.set_ylim(0,max(y_smoothed))
+            ax.set_xlabel("m/z")
+            ax.set_ylabel("Intensity")
 
-        ax.plot(X, y_smoothed, color="black", linewidth=2)
+            ax.plot(X, y_smoothed, color="black", linewidth=2)
 
-        # 右と上の枠線削除
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
+            # 右と上の枠線削除
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
 
         # グラフの描画
         self.fig_canvas.draw()
@@ -119,10 +127,14 @@ class Spectrum_from_MALDI(tk.Frame):
     #「ファイルを選択」ボタンを押したときの処理
     def file_button_command(self):
         # path取得
-        raw_data_path = self.get_raw_data_path()        
+        raw_data_path = self.get_raw_data_path()    
+
+        # 既存のグラフ削除    
+        plt.clf()
+
         # テキストボックスの更新
         self.file_frame.edit_box.delete(0, tk.END)
-        self.file_frame.edit_box.insert(tk.END, raw_data_path)
+        self.file_frame.edit_box.insert(tk.END, ",".join(raw_data_path))
 
         # グラフ描画
         self.create_spectrum(raw_data_path)
