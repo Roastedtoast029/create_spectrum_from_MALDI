@@ -15,7 +15,7 @@ class Spectrum_from_MALDI(tk.Frame):
 
         # pyplotの初期設定
         plt.rcParams['font.family'] = 'Arial'
-        plt.rcParams['font.size'] = '20'
+        # plt.rcParams['font.size'] = '20'
         plt.subplots_adjust(
             top=0.92,
             bottom=0.22,
@@ -31,7 +31,7 @@ class Spectrum_from_MALDI(tk.Frame):
         self.option_button = tk.Button(
                                 self.master, 
                                 text = "オプション", 
-                                #   command = self.get_params
+                                command = self.option_button_command
                                 )
 
         # 配置
@@ -124,7 +124,7 @@ class Spectrum_from_MALDI(tk.Frame):
         self.fig_canvas.draw()
     
     
-    #「ファイルを選択」ボタンを押したときの処理
+    # 「ファイルを選択」ボタンを押したときの処理
     def file_button_command(self):
         # path取得
         raw_data_path = self.get_raw_data_path()    
@@ -139,7 +139,22 @@ class Spectrum_from_MALDI(tk.Frame):
         # グラフ描画
         self.create_spectrum(raw_data_path)
 
-    
+    # 「オプション」ボタンを押したときの処理
+    def option_button_command(self):
+        # モーダル表示
+        dlg_modal = tk.Toplevel(self)
+        dlg_modal.title("オプション") # ウィンドウタイトル
+
+        # モーダルにする設定
+        dlg_modal.grab_set()        # モーダルにする
+        dlg_modal.focus_set()       # フォーカスを新しいウィンドウをへ移す
+        dlg_modal.transient(self.master)   # タスクバーに表示しない
+
+        # ダイアログが閉じられるまで待つ
+        app.wait_window(dlg_modal)
+
+        # 完了ボタンで閉じる＋パラメータ反映
+
     # 各種パラメータの初期設定、変更する場合はget_paramsを使用する
     class Params:
         figsize = (12.7, 2.9)
@@ -147,8 +162,8 @@ class Spectrum_from_MALDI(tk.Frame):
         upper_limit = 5000
     params = Params()
 
-    # def get_params(self, ):
-    #     return
+    def get_params(self, ):
+        return
 
 root = tk.Tk()
 app = Spectrum_from_MALDI(master=root)
