@@ -142,18 +142,34 @@ class Spectrum_from_MALDI(tk.Frame):
     # 「オプション」ボタンを押したときの処理
     def option_button_command(self):
         # モーダル表示
-        dlg_modal = tk.Toplevel(self)
-        dlg_modal.title("オプション") # ウィンドウタイトル
+        self.option_modal = tk.Toplevel(self)
+        self.option_modal.title("オプション") # ウィンドウタイトル
+        self.option_modal.geometry("600x400")
 
         # モーダルにする設定
-        dlg_modal.grab_set()        # モーダルにする
-        dlg_modal.focus_set()       # フォーカスを新しいウィンドウをへ移す
-        dlg_modal.transient(self.master)   # タスクバーに表示しない
-
-        # ダイアログが閉じられるまで待つ
-        app.wait_window(dlg_modal)
+        self.option_modal.grab_set()        # モーダルにする
+        self.option_modal.focus_set()       # フォーカスを新しいウィンドウをへ移す
+        self.option_modal.transient(self.master)   # タスクバーに表示しない
 
         # 完了ボタンで閉じる＋パラメータ反映
+        close_button = tk.Button(
+            self.option_modal,
+            text = '完了', 
+            command = self.close_button_command
+        )
+        close_button.pack(
+            side="bottom",
+            anchor=tk.E,
+            ipadx=20,
+            ipady=3,
+            padx=10,
+            pady=10
+        )
+
+
+    # 「完了」ボタンを押したときの処理
+    def close_button_command(self):
+        self.option_modal.destroy()
 
     # 各種パラメータの初期設定、変更する場合はget_paramsを使用する
     class Params:
