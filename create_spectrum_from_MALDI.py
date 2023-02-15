@@ -151,6 +151,14 @@ class Spectrum_from_MALDI(tk.Frame):
         self.option_modal.focus_set()       # フォーカスを新しいウィンドウをへ移す
         self.option_modal.transient(self.master)   # タスクバーに表示しない
 
+        # パラメータを入力できるダイアログ
+        self.param_dialog = tk.StringVar()
+        option_entry = tk.Entry(
+            self.option_modal,
+            textvariable=self.param_dialog
+        )
+        option_entry.pack()
+
         # 完了ボタンで閉じる＋パラメータ反映
         close_button = tk.Button(
             self.option_modal,
@@ -169,6 +177,7 @@ class Spectrum_from_MALDI(tk.Frame):
 
     # 「完了」ボタンを押したときの処理
     def close_button_command(self):
+
         self.option_modal.destroy()
 
     # 各種パラメータの初期設定、変更する場合はget_paramsを使用する
