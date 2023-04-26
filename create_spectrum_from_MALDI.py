@@ -24,6 +24,9 @@ class Spectrum_from_MALDI(tk.Frame):
             hspace=0.2,
             wspace=0.2
         )
+
+        # パラメータのインスタンスを生成
+        self.params = Params()
        
         # フレームとボタンの作成
         self.graph_frame = self.create_graph_frame()
@@ -46,6 +49,8 @@ class Spectrum_from_MALDI(tk.Frame):
         
         # matplotlibの描画領域の作成
         self.fig = plt.figure()
+        # axの入れ子
+        self.axes = []
         # matplotlibの描画領域とウィジェット(Frame)の関連付け
         self.fig_canvas = FigureCanvasTkAgg(self.fig, graph_frame)
         # matplotlibのツールバーを作成
@@ -119,6 +124,9 @@ class Spectrum_from_MALDI(tk.Frame):
             # 右と上の枠線削除
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
+            
+            # axを格納
+            self.axes.append(ax)
 
         # グラフの描画
         self.fig_canvas.draw()
@@ -177,18 +185,30 @@ class Spectrum_from_MALDI(tk.Frame):
 
     # 「完了」ボタンを押したときの処理
     def close_button_command(self):
-
+        
         self.option_modal.destroy()
 
-    # 各種パラメータの初期設定、変更する場合はget_paramsを使用する
-    class Params:
-        figsize = (12.7, 2.9)
-        lower_limit = 0
-        upper_limit = 5000
-    params = Params()
 
-    def get_params(self, ):
-        return
+# 各種パラメータの管理
+class Params:
+    def __init__(self):
+        # figsize = (12.7, 2.9)
+        self.lower_limit = 0
+        self.upper_limit = 5000
+    
+    def set_params(self, new_params):
+        # パラメータの上書き
+        for key, values in new_params:
+            setattr(self, key, values)
+        
+        # 各種パラメータ変更を反映
+        self.change_limit()
+
+    # 表示範囲の変更
+    def change_limit(self, axes):
+        for ax in axes:
+            ax.set_xlim(self.lower_limit,self.upper_limit)
+
 
 root = tk.Tk()
 app = Spectrum_from_MALDI(master=root)
