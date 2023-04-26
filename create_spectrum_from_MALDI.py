@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import tkinter as tk
@@ -26,7 +27,7 @@ class Spectrum_from_MALDI(tk.Frame):
         )
 
         # パラメータのインスタンスを生成
-        self.params = Params()
+        self.params = Params(self.master)
        
         # フレームとボタンの作成
         self.graph_frame = self.create_graph_frame()
@@ -108,13 +109,13 @@ class Spectrum_from_MALDI(tk.Frame):
 
             # スペクトル追加
             ax = self.fig.add_subplot(n_data, 1, i+1)
-            X = data[(self.params.lower_limit<=data["m/z"]) & (data["m/z"]<=self.params.upper_limit)]["m/z"]
-            y = data[(self.params.lower_limit<=data["m/z"]) & (data["m/z"]<=self.params.upper_limit)]["intensity"]
+            X = data[(self.params.lower_limit.get()<=data["m/z"]) & (data["m/z"]<=self.params.upper_limit.get())]["m/z"]
+            y = data[(self.params.lower_limit.get()<=data["m/z"]) & (data["m/z"]<=self.params.upper_limit.get())]["intensity"]
 
             # スムージング
             y_smoothed = gaussian_filter1d(y, sigma=7)
 
-            ax.set_xlim(self.params.lower_limit,self.params.upper_limit)
+            ax.set_xlim(self.params.lower_limit.get(),self.params.upper_limit.get())
             ax.set_ylim(0,max(y_smoothed))
             ax.set_xlabel("m/z")
             ax.set_ylabel("Intensity")
@@ -160,12 +161,27 @@ class Spectrum_from_MALDI(tk.Frame):
         self.option_modal.transient(self.master)   # タスクバーに表示しない
 
         # パラメータを入力できるダイアログ
-        self.param_dialog = tk.StringVar()
-        option_entry = tk.Entry(
-            self.option_modal,
-            textvariable=self.param_dialog
-        )
-        option_entry.pack()
+        
+        # （参考）
+        # self.param_dialog = tk.StringVar()
+        # option_entry = tk.Entry(
+        #     self.option_modal,
+        #     textvariable=self.param_dialog
+        # )
+        # option_entry.pack()
+
+        # m/zの表示範囲
+        mz_range_frame = tk.Frame(self.option_modal)
+        mz_range_frame.pack(fill=tk.X)
+        
+        mz_range_label = tk.Label(mz_range_frame,text="m/z range")
+        mz_range_label.grid(row=0, column=0, sticky=tk.W + tk.E)
+
+        lower_limit_entry = tk.Entry(mz_range_frame, textvariable=self.params.lower_limit)
+        lower_limit_entry.grid(row=0, column=1, sticky=tk.W + tk.E)
+        
+        upper_limit_entry = tk.Entry(mz_range_frame, textvariable=self.params.upper_limit)
+        upper_limit_entry.grid(row=0, column=2, sticky=tk.W + tk.E)
 
         # 完了ボタンで閉じる＋パラメータ反映
         close_button = tk.Button(
@@ -185,30 +201,34 @@ class Spectrum_from_MALDI(tk.Frame):
 
     # 「完了」ボタンを押したときの処理
     def close_button_command(self):
-        
+        # パラメータの変更を反映
+        self.params.reflect_params(self)
+        # モーダルの破棄
         self.option_modal.destroy()
+        # グラフの再表示
+        self.fig_canvas.draw()
 
 
 # 各種パラメータの管理
 class Params:
-    def __init__(self):
+    def __init__(self, master):
         # figsize = (12.7, 2.9)
-        self.lower_limit = 0
-        self.upper_limit = 5000
+        self.lower_limit = tk.DoubleVar(master, value=0.0)
+        self.upper_limit = tk.DoubleVar(master, value=5000.0)
     
-    def set_params(self, new_params):
-        # パラメータの上書き
-        for key, values in new_params:
-            setattr(self, key, values)
-        
+    def reflect_params(self, parent):
         # 各種パラメータ変更を反映
-        self.change_limit()
+        self.change_limit(parent)
 
     # 表示範囲の変更
-    def change_limit(self, axes):
-        for ax in axes:
-            ax.set_xlim(self.lower_limit,self.upper_limit)
-
+    def change_limit(self, parent):
+        for ax in parent.axes:
+            # x軸の変更
+            ax.set_xlim(self.lower_limit.get(),self.upper_limit.get())
+            # y軸の変更
+            x,y = list(ax.lines[0].get_data())
+            index_list = np.where((self.lower_limit.get()<=x) & (x<=self.upper_limit.get()))
+            ax.set_ylim(0,y[index_list].max())
 
 root = tk.Tk()
 app = Spectrum_from_MALDI(master=root)
