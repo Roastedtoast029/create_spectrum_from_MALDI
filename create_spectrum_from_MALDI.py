@@ -190,6 +190,32 @@ class Spectrum_from_MALDI(tk.Frame):
         upper_limit_entry = tk.Entry(mz_range_frame, textvariable=self.params.upper_limit)
         upper_limit_entry.pack(side="left",padx=15)
 
+        use_filter_frame = tk.Frame(self.option_modal)
+        use_filter_frame.pack(
+            fill=tk.X,
+            padx=30,
+            pady=30
+            )
+        
+        use_filter_label = tk.Label(use_filter_frame,text="gaussian filter")
+        use_filter_label.pack(side="left",padx=15)
+
+        use_filter_checkbox = tk.Checkbutton(use_filter_frame, variable=self.params.use_filter)
+        use_filter_checkbox.pack(side="left",padx=15)  
+
+        filter_sigma_frame = tk.Frame(self.option_modal)
+        filter_sigma_frame.pack(
+            fill=tk.X,
+            padx=30,
+            pady=30
+            )
+        
+        filter_sigma_label = tk.Label(filter_sigma_frame,text="m/z range")
+        filter_sigma_label.pack(side="left",padx=15)
+
+        filter_sigma_entry = tk.Entry(filter_sigma_frame, textvariable=self.params.filter_sigma)
+        filter_sigma_entry.pack(side="left",padx=15)    
+
         # 完了ボタンで閉じる＋パラメータ反映
         close_button = tk.Button(
             self.option_modal,
@@ -204,7 +230,7 @@ class Spectrum_from_MALDI(tk.Frame):
             padx=10,
             pady=10
         )
-
+        
 
     # 「完了」ボタンを押したときの処理
     def close_button_command(self):

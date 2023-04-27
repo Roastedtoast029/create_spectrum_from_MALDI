@@ -7,6 +7,8 @@ class Params:
         # figsize = (12.7, 2.9)
         self.lower_limit = tk.DoubleVar(master, value=0.0)
         self.upper_limit = tk.DoubleVar(master, value=5000.0)
+        self.use_filter = tk.BooleanVar(master, value=False)
+        self.filter_sigma = tk.IntVar(master, value=15)
     
     def reflect_params(self, parent):
         # 各種パラメータ変更を反映
