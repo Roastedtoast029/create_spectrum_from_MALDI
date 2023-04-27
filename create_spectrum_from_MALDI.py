@@ -1,10 +1,10 @@
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import tkinter as tk
 import openpyxl
 from scipy.ndimage import gaussian_filter1d
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from Params import Params
 
 class Spectrum_from_MALDI(tk.Frame):
     # コンストラクタ
@@ -113,7 +113,7 @@ class Spectrum_from_MALDI(tk.Frame):
             y = data[(self.params.lower_limit.get()<=data["m/z"]) & (data["m/z"]<=self.params.upper_limit.get())]["intensity"]
 
             # スムージング
-            y_smoothed = gaussian_filter1d(y, sigma=7)
+            y_smoothed = gaussian_filter1d(y, sigma=31)
 
             ax.set_xlim(self.params.lower_limit.get(),self.params.upper_limit.get())
             ax.set_ylim(0,max(y_smoothed))
@@ -140,6 +140,9 @@ class Spectrum_from_MALDI(tk.Frame):
 
         # 既存のグラフ削除    
         plt.clf()
+
+        # axes削除
+        self.axes = []
 
         # テキストボックスの更新
         self.file_frame.edit_box.delete(0, tk.END)
@@ -172,16 +175,20 @@ class Spectrum_from_MALDI(tk.Frame):
 
         # m/zの表示範囲
         mz_range_frame = tk.Frame(self.option_modal)
-        mz_range_frame.pack(fill=tk.X)
+        mz_range_frame.pack(
+            fill=tk.X,
+            padx=30,
+            pady=30
+            )
         
         mz_range_label = tk.Label(mz_range_frame,text="m/z range")
-        mz_range_label.grid(row=0, column=0, sticky=tk.W + tk.E)
+        mz_range_label.pack(side="left",padx=15)
 
         lower_limit_entry = tk.Entry(mz_range_frame, textvariable=self.params.lower_limit)
-        lower_limit_entry.grid(row=0, column=1, sticky=tk.W + tk.E)
+        lower_limit_entry.pack(side="left",padx=15)
         
         upper_limit_entry = tk.Entry(mz_range_frame, textvariable=self.params.upper_limit)
-        upper_limit_entry.grid(row=0, column=2, sticky=tk.W + tk.E)
+        upper_limit_entry.pack(side="left",padx=15)
 
         # 完了ボタンで閉じる＋パラメータ反映
         close_button = tk.Button(
@@ -207,28 +214,6 @@ class Spectrum_from_MALDI(tk.Frame):
         self.option_modal.destroy()
         # グラフの再表示
         self.fig_canvas.draw()
-
-
-# 各種パラメータの管理
-class Params:
-    def __init__(self, master):
-        # figsize = (12.7, 2.9)
-        self.lower_limit = tk.DoubleVar(master, value=0.0)
-        self.upper_limit = tk.DoubleVar(master, value=5000.0)
-    
-    def reflect_params(self, parent):
-        # 各種パラメータ変更を反映
-        self.change_limit(parent)
-
-    # 表示範囲の変更
-    def change_limit(self, parent):
-        for ax in parent.axes:
-            # x軸の変更
-            ax.set_xlim(self.lower_limit.get(),self.upper_limit.get())
-            # y軸の変更
-            x,y = list(ax.lines[0].get_data())
-            index_list = np.where((self.lower_limit.get()<=x) & (x<=self.upper_limit.get()))
-            ax.set_ylim(0,y[index_list].max())
 
 root = tk.Tk()
 app = Spectrum_from_MALDI(master=root)
