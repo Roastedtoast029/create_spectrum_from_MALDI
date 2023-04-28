@@ -13,7 +13,7 @@ class Spectrum_from_MALDI(tk.Frame):
         super().__init__(master)
         self.master = master
         self.master.title("MALDI用スペクトル表示ツール")
-        self.master.geometry("1200x700+100+100")
+        self.master.geometry("1200x800+100+100")
 
         # 各種設定置き場
         self.sidebar_font=("Arial", "10")
