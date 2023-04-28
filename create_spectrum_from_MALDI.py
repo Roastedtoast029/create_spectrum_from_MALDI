@@ -13,8 +13,11 @@ class Spectrum_from_MALDI(tk.Frame):
         super().__init__(master)
         self.master = master
         self.master.title("MALDI用スペクトル表示ツール")
+        self.master.geometry("1200x700+100+100")
 
         # 各種設定置き場
+        self.sidebar_font=("Arial", "10")
+
         self.option_label_font=("Times", "18")
         self.option_entry_font=("Times", "18")
         self.option_entry_width=10
@@ -22,31 +25,17 @@ class Spectrum_from_MALDI(tk.Frame):
         # pyplotの初期設定
         plt.rcParams['font.family'] = 'Arial'
         # plt.rcParams['font.size'] = '20'
-        plt.subplots_adjust(
-            top=0.92,
-            bottom=0.22,
-            left=0.125,
-            right=0.9,
-            hspace=0.2,
-            wspace=0.2
-        )
 
         # パラメータのインスタンスを生成
         self.params = Params(self.master)
        
         # フレームとボタンの作成
+        self.sidebar_frame = self.create_sidebar_frame()
         self.graph_frame = self.create_graph_frame()
-        self.file_frame = self.create_file_frame()
-        self.option_button = tk.Button(
-                                self.master, 
-                                text = "オプション", 
-                                command = self.option_button_command
-                                )
 
         # 配置
+        self.sidebar_frame.pack(fill=tk.BOTH)
         self.graph_frame.pack(fill=tk.BOTH, expand=True)
-        self.file_frame.pack()
-        self.option_button.pack()
 
 
     # matplotlib配置用フレームの作成
@@ -55,6 +44,14 @@ class Spectrum_from_MALDI(tk.Frame):
         
         # matplotlibの描画領域の作成
         self.fig = plt.figure()
+        self.fig.subplots_adjust(
+            top=0.95,
+            bottom=0.1,
+            left=0.1,
+            right=0.9,
+            hspace=0.5,
+            wspace=0.2
+        )
         # axの入れ子
         self.axes = []
         # matplotlibの描画領域とウィジェット(Frame)の関連付け
@@ -65,26 +62,30 @@ class Spectrum_from_MALDI(tk.Frame):
         self.fig_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
         return graph_frame
-    
 
-    # ファイル選択フレーム
-    def create_file_frame(self):
-        file_frame = tk.Frame(self.master)
 
-        # ラベル
-        tk.Label(file_frame, text = "ファイル").pack(side = tk.LEFT)
-        # テキストボックスの作成と配置
-        file_frame.edit_box = tk.Entry(file_frame, width = 50)
-        file_frame.edit_box.pack(side = tk.LEFT, expand=True)
-        # ボタンの作成と配置
+    # サイドバー用フレーム
+    def create_sidebar_frame(self):
+        sidebar_frame = tk.Frame(self.master)
+
         file_button = tk.Button(
-            file_frame, 
-            text = 'ファイルを選択', 
+            sidebar_frame, 
+            text = 'File', 
+            font = self.sidebar_font,
             command = self.file_button_command
-        )
-        file_button.pack(side = tk.LEFT)
+            )
+        
+        option_button = tk.Button(
+            sidebar_frame, 
+            text = "Option",
+            font = self.sidebar_font,
+            command = self.option_button_command
+            )
+        
+        file_button.pack(side="left",ipadx=5,anchor=tk.W)
+        option_button.pack(side="left",ipadx=5,anchor=tk.W)
 
-        return file_frame
+        return sidebar_frame
     
 
     # 元データのファイルパスを返す
@@ -127,6 +128,7 @@ class Spectrum_from_MALDI(tk.Frame):
             ax.set_ylim(0,max(y_smoothed))
             ax.set_xlabel("m/z")
             ax.set_ylabel("Intensity")
+            ax.ticklabel_format(style="sci", axis="y", scilimits=(0,0))
 
             ax.plot(X, y_smoothed, color="black", linewidth=2)
 
@@ -153,8 +155,8 @@ class Spectrum_from_MALDI(tk.Frame):
         self.axes = []
 
         # テキストボックスの更新
-        self.file_frame.edit_box.delete(0, tk.END)
-        self.file_frame.edit_box.insert(tk.END, ",".join(raw_data_path))
+        # self.file_frame.edit_box.delete(0, tk.END)
+        # self.file_frame.edit_box.insert(tk.END, ",".join(raw_data_path))
 
         # グラフ描画
         self.create_spectrum(raw_data_path)
@@ -164,7 +166,7 @@ class Spectrum_from_MALDI(tk.Frame):
         # モーダル表示
         self.option_modal = tk.Toplevel(self)
         self.option_modal.title("オプション") # ウィンドウタイトル
-        self.option_modal.geometry("600x400")
+        self.option_modal.geometry("600x400+200+200")
 
         # モーダルにする設定
         self.option_modal.grab_set()        # モーダルにする
