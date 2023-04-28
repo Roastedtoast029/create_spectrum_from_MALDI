@@ -126,7 +126,8 @@ class Spectrum_from_MALDI(tk.Frame):
 
             ax.set_xlim(self.params.lower_limit.get(),self.params.upper_limit.get())
             ax.set_ylim(0,max(y_smoothed))
-            ax.set_xlabel("m/z")
+            if i == len(raw_data_path)-1:
+                ax.set_xlabel("m/z")
             ax.set_ylabel("Intensity")
             ax.ticklabel_format(style="sci", axis="y", scilimits=(0,0))
 
