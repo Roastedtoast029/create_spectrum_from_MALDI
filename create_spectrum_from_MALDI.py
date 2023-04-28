@@ -14,6 +14,11 @@ class Spectrum_from_MALDI(tk.Frame):
         self.master = master
         self.master.title("MALDI用スペクトル表示ツール")
 
+        # 各種設定置き場
+        self.option_label_font=("Times", "18")
+        self.option_entry_font=("Times", "18")
+        self.option_entry_width=10
+
         # pyplotの初期設定
         plt.rcParams['font.family'] = 'Arial'
         # plt.rcParams['font.size'] = '20'
@@ -113,7 +118,10 @@ class Spectrum_from_MALDI(tk.Frame):
             y = data[(self.params.lower_limit.get()<=data["m/z"]) & (data["m/z"]<=self.params.upper_limit.get())]["intensity"]
 
             # スムージング
-            y_smoothed = gaussian_filter1d(y, sigma=31)
+            if self.params.use_filter.get():
+                y_smoothed = gaussian_filter1d(y, sigma=self.params.filter_sigma.get())
+            else:
+                y_smoothed = y
 
             ax.set_xlim(self.params.lower_limit.get(),self.params.upper_limit.get())
             ax.set_ylim(0,max(y_smoothed))
@@ -181,13 +189,27 @@ class Spectrum_from_MALDI(tk.Frame):
             pady=30
             )
         
-        mz_range_label = tk.Label(mz_range_frame,text="m/z range")
+        mz_range_label = tk.Label(
+            mz_range_frame,
+            text="m/z range",
+            font=self.option_label_font
+            )
         mz_range_label.pack(side="left",padx=15)
 
-        lower_limit_entry = tk.Entry(mz_range_frame, textvariable=self.params.lower_limit)
+        lower_limit_entry = tk.Entry(
+            mz_range_frame,
+            textvariable=self.params.lower_limit,
+            font=self.option_entry_font,
+            width=self.option_entry_width
+            )
         lower_limit_entry.pack(side="left",padx=15)
         
-        upper_limit_entry = tk.Entry(mz_range_frame, textvariable=self.params.upper_limit)
+        upper_limit_entry = tk.Entry(
+            mz_range_frame,
+            textvariable=self.params.upper_limit,
+            font=self.option_entry_font,
+            width=self.option_entry_width
+            )
         upper_limit_entry.pack(side="left",padx=15)
 
         use_filter_frame = tk.Frame(self.option_modal)
@@ -197,7 +219,11 @@ class Spectrum_from_MALDI(tk.Frame):
             pady=30
             )
         
-        use_filter_label = tk.Label(use_filter_frame,text="gaussian filter")
+        use_filter_label = tk.Label(
+            use_filter_frame,
+            text="gaussian filter",
+            font=self.option_label_font
+            )
         use_filter_label.pack(side="left",padx=15)
 
         use_filter_checkbox = tk.Checkbutton(use_filter_frame, variable=self.params.use_filter)
@@ -210,10 +236,19 @@ class Spectrum_from_MALDI(tk.Frame):
             pady=30
             )
         
-        filter_sigma_label = tk.Label(filter_sigma_frame,text="m/z range")
+        filter_sigma_label = tk.Label(
+            filter_sigma_frame,
+            text="filter_sigma",
+            font=self.option_label_font
+            )
         filter_sigma_label.pack(side="left",padx=15)
 
-        filter_sigma_entry = tk.Entry(filter_sigma_frame, textvariable=self.params.filter_sigma)
+        filter_sigma_entry = tk.Entry(
+            filter_sigma_frame,
+            textvariable=self.params.filter_sigma,
+            font=self.option_entry_font,
+            width=self.option_entry_width
+            )
         filter_sigma_entry.pack(side="left",padx=15)    
 
         # 完了ボタンで閉じる＋パラメータ反映
