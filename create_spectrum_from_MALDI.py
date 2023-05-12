@@ -94,7 +94,7 @@ class Spectrum_from_MALDI(tk.Frame):
         dir = "C:/"
         raw_data_path = tk.filedialog.askopenfilenames(
             filetypes = typ, 
-            initialdir = dir
+            # initialdir = dir
         ) 
         return raw_data_path
     
