@@ -149,6 +149,9 @@ class Spectrum_from_MALDI(tk.Frame):
     
     # 「File」ボタンを押したときの処理
     def file_button_command(self):
+        # raw_datas削除
+        self.raw_datas = []
+
         # path取得
         self.get_raw_data_from_path()  
 
