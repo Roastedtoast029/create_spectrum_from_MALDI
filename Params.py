@@ -11,13 +11,10 @@ class Params:
         self.filter_sigma = tk.IntVar(master, value=15)
         # 変更検知用のハッシュ
         self.old_hash = hash(tuple(map(lambda x: x.get(), vars(self).values())))
-        print(self.old_hash)
-        print(vars(self))
 
     def reflect_params(self, parent):
         if self.check_modify():
-            # parent.create_spectrum()
-            pass
+            parent.create_spectrum()
         else:
             pass
 
@@ -40,13 +37,13 @@ class Params:
     #     # 各種パラメータ変更を反映
     #     self.change_limit(parent)
 
-    # 表示範囲の変更
-    def change_limit(self, parent):
-        for ax in parent.axes:
-            # x軸の変更
-            ax.set_xlim(self.lower_limit.get(),self.upper_limit.get())
-            # y軸の変更
-            x,y = list(ax.lines[0].get_data())
-            index_list = np.where((self.lower_limit.get()<=x) & (x<=self.upper_limit.get()))
-            ax.set_ylim(0,y[index_list].max())
+    # # 表示範囲の変更
+    # def change_limit(self, parent):
+    #     for ax in parent.axes:
+    #         # x軸の変更
+    #         ax.set_xlim(self.lower_limit.get(),self.upper_limit.get())
+    #         # y軸の変更
+    #         x,y = list(ax.lines[0].get_data())
+    #         index_list = np.where((self.lower_limit.get()<=x) & (x<=self.upper_limit.get()))
+    #         ax.set_ylim(0,y[index_list].max())
 
