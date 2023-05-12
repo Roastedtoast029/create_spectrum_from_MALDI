@@ -52,8 +52,8 @@ class Spectrum_from_MALDI(tk.Frame):
             hspace=0.5,
             wspace=0.2
         )
-        # axの入れ子
-        self.axes = []
+        # raw_dataの入れ子
+        self.raw_datas = []
         # matplotlibの描画領域とウィジェット(Frame)の関連付け
         self.fig_canvas = FigureCanvasTkAgg(self.fig, graph_frame)
         # matplotlibのツールバーを作成
@@ -88,24 +88,30 @@ class Spectrum_from_MALDI(tk.Frame):
         return sidebar_frame
     
 
-    # 元データのファイルパスを返す
-    def get_raw_data_path(self):
+    # 選択されたファイルからraw_dataを生成
+    def get_raw_data_from_path(self):
         typ = [('テキストファイル', '*.txt')]
-        dir = "C:/"
+        # dir = "C:/"
         raw_data_path = tk.filedialog.askopenfilenames(
             filetypes = typ, 
-            initialdir = dir
+            # initialdir = dir
         ) 
-        return raw_data_path
-    
-
-    # スペクトルの作成
-    def create_spectrum(self, raw_data_path):        
-        # 複数のグラフを縦に並べる
-        n_data = len(raw_data_path)
+        
+        # raw_dataを格納
         for i,path in enumerate(raw_data_path):
             f = open(path, "r")
             raw_data = list(map(lambda x: list(map(float, x.split())),f.readlines()))
+            self.raw_datas.append(raw_data)
+
+
+    # スペクトルの作成
+    def create_spectrum(self):    
+        # 既存のスペクトル削除
+        plt.clf()
+
+        # 複数のグラフを縦に並べる
+        n_data = len(self.raw_datas)
+        for i,raw_data in enumerate(self.raw_datas):
 
             # pd.DataFrameにしてm/zでグループ化
             df = pd.DataFrame(raw_data, columns=["m/z", "intensity"])
@@ -126,7 +132,7 @@ class Spectrum_from_MALDI(tk.Frame):
 
             ax.set_xlim(self.params.lower_limit.get(),self.params.upper_limit.get())
             ax.set_ylim(0,max(y_smoothed))
-            if i == len(raw_data_path)-1:
+            if i == len(self.raw_datas)-1:
                 ax.set_xlabel("m/z")
             ax.set_ylabel("Intensity")
             ax.ticklabel_format(style="sci", axis="y", scilimits=(0,0))
@@ -137,32 +143,19 @@ class Spectrum_from_MALDI(tk.Frame):
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
             
-            # axを格納
-            self.axes.append(ax)
-
         # グラフの描画
         self.fig_canvas.draw()
     
     
-    # 「ファイルを選択」ボタンを押したときの処理
+    # 「File」ボタンを押したときの処理
     def file_button_command(self):
         # path取得
-        raw_data_path = self.get_raw_data_path()    
-
-        # 既存のグラフ削除    
-        plt.clf()
-
-        # axes削除
-        self.axes = []
-
-        # テキストボックスの更新
-        # self.file_frame.edit_box.delete(0, tk.END)
-        # self.file_frame.edit_box.insert(tk.END, ",".join(raw_data_path))
+        self.get_raw_data_from_path()  
 
         # グラフ描画
-        self.create_spectrum(raw_data_path)
+        self.create_spectrum()
 
-    # 「オプション」ボタンを押したときの処理
+    # 「Option」ボタンを押したときの処理
     def option_button_command(self):
         # モーダル表示
         self.option_modal = tk.Toplevel(self)
