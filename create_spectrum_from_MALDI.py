@@ -21,7 +21,8 @@ class Spectrum_from_MALDI(tk.Frame):
         self.option_label_font=("Times", "18")
         self.option_entry_font=("Times", "18")
         self.option_entry_width=10
-
+        
+        
         # pyplotの初期設定
         plt.rcParams['font.family'] = 'Arial'
         # plt.rcParams['font.size'] = '20'
